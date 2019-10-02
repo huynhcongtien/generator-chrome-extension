@@ -1,4 +1,7 @@
-var Generator = require('yeoman-generator');
+const chalk     = require('chalk');
+const yosay     = require('yosay');
+const Generator = require('yeoman-generator');
+const slugify   = require('slugify');
 
 module.exports = class extends Generator {
 
@@ -7,45 +10,45 @@ module.exports = class extends Generator {
         // Calling the super constructor is important so our generator is correctly set up
         super(args, opts);
 
-        // Next, add your custom code
-        this.option('babel'); // This method adds support for a `--babel` flag
+        // init extension manifest data
+        this.manifest = {
+            permissions: {}
+        };
     }
 
     async prompting() {
         this.answers = await this.prompt([
             {
-                type: "input",
-                name: "name",
-                message: "Your project name",
-                default: this.appname // Default to current folder name
+                type   : 'input',
+                name   : 'name',
+                message: 'What would you like to call this extension?',
+                default: this.appname
             },
             {
-                type: "input",
-                name: "description",
-                message: "Your project name",
-                default: this.appname // Default to current folder name
-            },
-            {
-                type: "confirm",
-                name: "cool",
-                message: "Would you like to enable the Cool feature?"
-            },
-            {
-                type: "input",
-                name: "title",
-                message: "Your project title"
+                type   : 'input',
+                name   : 'shortName',
+                message: 'And how would you call it if you only had 12 characters (short_name)?',
+                default: answers => answers.name.substr(0, 11).trim()
+            }, {
+                name   : 'description',
+                message: 'How would you like to describe this extension?',
+                default: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
             }
         ]);
+    }
 
-        this.log("app name", this.answers.name);
-        this.log("cool feature", this.answers.cool);
+    prepareData() {
+        // Meta
+        this.appname              = this.manifest.name = this.answers.name.replace(/"/g, '\\"');
+        this.appShortName         = this.manifest.shortName = this.answers.shortName.replace(/"/g, '\\"');
+        this.appDescription       = this.answers.description;
+        this.manifest.description = this.answers.description.replace(/"/g, '\\"');
     }
 
     app() {
         this.fs.copy(
             this.templatePath('app'),
-            this.destinationPath('app'),
-            // { title: this.answers.title } // user answer `title` used
+            this.destinationPath('app')
         );
     }
 
@@ -61,14 +64,56 @@ module.exports = class extends Generator {
         );
     }
 
-    packageJSON () {
+    packageJSON() {
         this.fs.copyTpl(
             this.templatePath('_package.json'),
-            this.destinationPath('package.json'), {
-                name: slugify(this.appname),
+            this.destinationPath('package.json'),
+            {
+                name       : slugify(this.appname),
                 description: this.manifest.description
             }
-        )
+        );
+    }
+
+    readme() {
+        this.fs.copyTpl(
+            this.templatePath('README.md'),
+            this.destinationPath('README.md'),
+            {
+                name       : this.appname,
+                description: this.appDescription
+            }
+        );
+    }
+
+    git() {
+        this.fs.copy(
+            this.templatePath('gitignore'),
+            this.destinationPath('.gitignore')
+        );
+
+        this.fs.copy(
+            this.templatePath('gitattributes'),
+            this.destinationPath('.gitattributes')
+        );
+    }
+
+    editorConfig() {
+        this.fs.copy(
+            this.templatePath('editorconfig'),
+            this.destinationPath('.editorconfig')
+        );
+    }
+
+    installing() {
+        this.log('I\'m all done. Running ' + chalk.yellow('npm install') + ' for you to install the required dependencies. If this fails, try running the command yourself.');
+        this.npmInstall();
+    }
+
+    end() {
+        this.log(
+            yosay('Please run ' + chalk.red('gulp') + ' or  ' + chalk.yellow('gulp --watch') + ' and load the generated dist into chrome.')
+        );
     }
 
 };

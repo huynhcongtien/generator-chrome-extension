@@ -10,9 +10,5 @@
   "appDescription": {
     "message": "<%= description %>",
     "description": "The description of the application"
-  }<% if (action) { %>,
-  "browserActionTitle": {
-    "message": "<%= name %>",
-    "description": "The title of the browser action button"
-  }<% } %>
+  }
 }

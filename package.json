@@ -1,7 +1,7 @@
 {
-  "name": "generator-chrome-extension",
+  "name": "generator-chrome-extension-quick",
   "version": "1.0.0",
-  "description": "Generator chrome extension",
+  "description": "Yeoman generator",
   "main": "generators/app/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,10 @@
     "yeoman-generator"
   ],
   "dependencies": {
-    "yeoman-generator": "^4.1.0"
+    "chalk": "^2.4.2",
+    "slugify": "^1.3.5",
+    "yeoman-generator": "^4.1.0",
+    "yosay": "^2.0.2"
   },
   "author": "Huynh Cong Tien",
   "license": "MIT"
